@@ -2,14 +2,13 @@
 title: API Reference
 
 language_tabs: # must be one of https://git.io/vQNgJ
-  - shell
-  - ruby
+  - bash
   - python
-  - javascript
+  - ruby
 
 toc_footers:
-  - <a href='#'>Sign Up for a Developer Key</a>
-  - <a href='https://github.com/lord/slate'>Documentation Powered by Slate</a>
+  - <a href='https://jira.wargaming.net/projects/WGCMDB/issues/WGCMDB-1643?filter=allopenissues'>Связаться с разработчиками</a>
+
 
 includes:
   - errors
@@ -19,163 +18,158 @@ search: true
 
 # Introduction
 
-Welcome to the Kittn API! You can use our API to access Kittn API endpoints, which can get information on various cats, kittens, and breeds in our database.
+**CMDB (Configuration Management Database, база данных управления конфигурациями)** — это база данных для хранения информации о конфигурационных единицах (CIs) и их взаимосвязях. Используется для управления сервисами (изменениями, релизами, инцидентами, конфигурациями, проблемами, запросами на обслуживание и т.д.) в соответствии с ITIL. 
 
-We have language bindings in Shell, Ruby, Python, and JavaScript! You can view code examples in the dark area to the right, and you can switch the programming language of the examples with the tabs in the top right.
+# Base URL
+Здесь и далее все URL указаны относительно базового URL:
 
-This example API documentation page was created with [Slate](https://github.com/lord/slate). Feel free to edit it and use it as a base for your own API's documentation.
+* Тестовая площадка: [https://test.cfg.iv/services/rest/v3](https://test.cfg.iv/services/rest/v3)
+* "Продакшен" площадка: [https://cfg.wargaming.net/services/rest/v3](https://cfg.wargaming.net/services/rest/v3)
 
 # Authentication
 
-> To authorize, use this code:
+## Basic Auth
 
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-```
+> Тестовая площадка:
 
 ```shell
-# With shell, you can just pass the correct header with each request
-curl "api_endpoint_here"
-  -H "Authorization: meowmeowmeow"
+curl -ik -u j_doe:secret https://test.cfg.iv/services/rest/v3
+
+curl -ik -u 'corp\j_doe':secret https://test.cfg.iv/services/rest/v3
+
+curl -ik -u 'j_doe@wargaming.net':secret https://test.cfg.iv/services/rest/v3
 ```
 
-```javascript
-const kittn = require('kittn');
+> "Продакшен" площадка:
 
-let api = kittn.authorize('meowmeowmeow');
+```shell
+curl -u j_doe:secret https://cfg.wargaming.net/services/rest/v3
+
+curl -u 'corp\j_doe':secret https://cfg.wargaming.net/services/rest/v3
+
+curl -u 'j_doe@wargaming.net':secret https://cfg.wargaming.net/services/rest/v3
 ```
-
-> Make sure to replace `meowmeowmeow` with your API key.
-
-Kittn uses API keys to allow access to the API. You can register a new Kittn API key at our [developer portal](http://example.com/developers).
-
-Kittn expects for the API key to be included in all API requests to the server in a header that looks like the following:
-
-`Authorization: meowmeowmeow`
+При запросах напрямую к урлам сервиса поддерживается HTTP-заголовок `Authorization` (либо опция `-u`) с basic кредами пользователя.
 
 <aside class="notice">
-You must replace <code>meowmeowmeow</code> with your personal API key.
+При написании запросов к тестовым урлам, в заголовок запроса необходимо добавлять опцию `-ik`, отвечающую за запросы к тестовому серверу без верификации сертификата.
 </aside>
 
-# Kittens
+## Session
 
-## Get All Kittens
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get()
-```
+> Тестовая площадка:
 
 ```shell
-curl "http://example.com/api/kittens"
-  -H "Authorization: meowmeowmeow"
+curl -ik -u j_doe:secret https://test.cfg.iv/services/rest/v3
+
+curl -ik -u 'corp\j_doe':secret https://test.cfg.iv/services/rest/v3
+
+curl -ik -u 'j_doe@wargaming.net':secret https://test.cfg.iv/services/rest/v3
 ```
 
-```javascript
-const kittn = require('kittn');
+> "Продакшен" площадка:
 
-let api = kittn.authorize('meowmeowmeow');
-let kittens = api.kittens.get();
+```shell
+curl -u j_doe:secret https://cfg.wargaming.net/services/rest/v3
+
+curl -u 'corp\j_doe':secret https://cfg.wargaming.net/services/rest/v3
+
+curl -u 'j_doe@wargaming.net':secret https://cfg.wargaming.net/services/rest/v3
 ```
 
-> The above command returns JSON structured like this:
+Авторизация через сервис CMDB.  URLs авторизации:
 
-```json
+* [cfg.wargaming.net/services/rest/v3/sessions](cfg.wargaming.net/services/rest/v3/sessions)
+* [test.cfg.iv/services/rest/v3/sessions](cfg.wargaming.net/services/rest/v3/sessions)
+
+<aside class="notice">
+При написании запросов к тестовым урлам, в заголовок запроса необходимо добавлять опцию `-ik`, отвечающую за запросы к тестовому серверу без верификации сертификата.
+</aside>
+
+# Classes API
+
+## Получение списка классов
+
+> Sample request
+
+```shell
+curl -ik \
+    -H 'CMDBuild-Authorization: ecf46766-3b7f-4d1e-bd86-1e361c395fe6' \
+    -H 'Accept: application/json' \
+    -X GET https://test.cfg.iv/services/rest/v3/class
+```
+
+> Sample response:
+
+```shell
 [
-  {
-    "id": 1,
-    "name": "Fluffums",
-    "breed": "calico",
-    "fluffiness": 6,
-    "cuteness": 7
-  },
-  {
-    "id": 2,
-    "name": "Max",
-    "breed": "unknown",
-    "fluffiness": 5,
-    "cuteness": 10
-  }
+    "Service",
+    "Configurations",
+    "AppConfig",
+    "Components",
+    ...
+    "WGDPHost",
+    "WGDPServiceInstance",
+    "VitrualizationClusters"
 ]
 ```
 
-This endpoint retrieves all kittens.
+Получение списка всех <a href='https://confluence.wargaming.net/display/GLMNT/%5BWGCMDB%5D+General+Overview#id-[WGCMDB]GeneralOverview-Class(%D0%9A%D0%BB%D0%B0%D1%81%D1%81'>классов</a>, созданных в CMDB. 
 
 ### HTTP Request
 
-`GET http://example.com/api/kittens`
+`GET /class`
 
-### Query Parameters
-
-Parameter | Default | Description
---------- | ------- | -----------
-include_cats | false | If set to true, the result will also include cats.
-available | true | If set to false, the result will include kittens that have already been adopted.
-
-<aside class="success">
+<!-- <aside class="success">
 Remember — a happy kitten is an authenticated kitten!
-</aside>
+</aside> -->
 
-## Get a Specific Kitten
+## Получение атрибутов класса
 
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get(2)
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get(2)
-```
+> Sample request:
 
 ```shell
-curl "http://example.com/api/kittens/2"
-  -H "Authorization: meowmeowmeow"
+curl -ik \
+    -H 'CMDBuild-Authorization: ecf46766-3b7f-4d1e-bd86-1e361c395fe6' \
+    -H 'Accept: application/json' \
+    -X GET https://test.cfg.iv/services/rest/v3/class/Application
 ```
 
-```javascript
-const kittn = require('kittn');
+> Sample response:
 
-let api = kittn.authorize('meowmeowmeow');
-let max = api.kittens.get(2);
+```shell
+[
+    {
+        "code":"Description",
+        "description":"Name",
+        "apiName":"name",
+        "type":"StringAttribute"
+    },
+    {
+        "code":"Notes",
+        "description":"Notes",
+        "apiName":"notes",
+        "type":"TextAttribute"
+    },
+    {
+        "code":"Game",
+        "description":"Game",
+        "apiName":"game",
+        "type":"ReferenceAttribute"
+    },
+    ...
+    {
+        "code":"ProjectVersion",
+        "description":"Project Version",
+        "apiName":"project_version",
+        "type":"ReferenceAttribute"
+    }
+]
 ```
 
-> The above command returns JSON structured like this:
+Получение списка атрибутов выбранного класса. 
 
-```json
-{
-  "id": 2,
-  "name": "Max",
-  "breed": "unknown",
-  "fluffiness": 5,
-  "cuteness": 10
-}
-```
-
-This endpoint retrieves a specific kitten.
-
-<aside class="warning">Inside HTML code blocks like this one, you can't use Markdown, so use <code>&lt;code&gt;</code> blocks to denote code.</aside>
+<!-- <aside class="warning">Inside HTML code blocks like this one, you can't use Markdown, so use <code>&lt;code&gt;</code> blocks to denote code.</aside> -->
 
 ### HTTP Request
 
@@ -185,55 +179,52 @@ This endpoint retrieves a specific kitten.
 
 Parameter | Description
 --------- | -----------
-ID | The ID of the kitten to retrieve
+{classname} | Имя класса, список атрибутов которого необходимо получить.
 
-## Delete a Specific Kitten
+### Body Parameters
 
-```ruby
-require 'kittn'
+Parameter | Description | Data type
+--------- | ----------- | -------
+code | Уникальное имя атрибута. | String
+description | Имя, под которым атрибут отображается в пользовательском интерфейсе CMDBuild. | String
+apiName | Имя атрибута для упрощенных запросов. | String
+type | Тип атрибута. Побдоробнее о типах атрибутов см. <a href='https://confluence.wargaming.net/display/GLMNT/%5BWGCMDB%5D+General+Overview#id-[WGCMDB]GeneralOverview-Class(%D0%9A%D0%BB%D0%B0%D1%81%D1%81'>Терминология CMDB</a>. | String
 
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.delete(2)
-```
+## Удаление карточки
 
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.delete(2)
-```
+> Sample request
 
 ```shell
-curl "http://example.com/api/kittens/2"
-  -X DELETE
-  -H "Authorization: meowmeowmeow"
+curl -ik \
+    -H 'Accept: application/json' \
+    -H 'X-HTTP-Method-Override: DELETE' \
+    -H 'CMDBuild-Authorization: ecf46766-3b7f-4d1e-bd86-1e361c395fe6' \
+    -X DELETE https://test.cfg.iv/services/rest/v3/class/Realm/card/test_4
+```
+> Sample response
+
+```shell
+HTTP/1.1 200 OK
 ```
 
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-let max = api.kittens.delete(2);
-```
-
-> The above command returns JSON structured like this:
-
-```json
-{
-  "id": 2,
-  "deleted" : ":("
-}
-```
-
-This endpoint deletes a specific kitten.
+Удаление карточки из выбранного класса.
 
 ### HTTP Request
 
-`DELETE http://example.com/kittens/<ID>`
+`DELETE /class/{classname}/card/{key}`
 
-### URL Parameters
+### Path Parameters
 
 Parameter | Description
 --------- | -----------
-ID | The ID of the kitten to delete
+{classname} | Имя класса, которому принадлежит карточка.
+{key} | Ключ карточки — уникальное значение атрибута ID, Code или Description.
+
+<aside class="warning">
+Удаленные карточки не исчезают из базы данных: вместо этого, их статус меняются с A (Active) или U (Updated) на N (Inactive/Removed).
+</aside>
+
+# Cards API
+
+# History API
 
